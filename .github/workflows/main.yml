@@ -1,0 +1,55 @@
+name: Feature Branch Workflow
+
+on:
+  push:
+    branches:
+      - feature/dummy
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set Up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+
+    - name: Install Dependencies
+      run: pip install -r requirements.txt
+
+    - name: Print Dataset Info
+      run: |
+        # 2.1: Calculate and print the number of total samples in the dataset
+        total_samples=$(( $(wc -l < train_data.txt) + $(wc -l < test_data.txt) + $(wc -l < dev_data.txt) ))
+        echo "Total samples in the dataset: $total_samples"
+
+        # 2.2: Calculate and print the size (height and width) of the images in the dataset
+        image_size=$(identify -format "%w x %h" image.png)
+        echo "Image size (height x width): $image_size"
+
+    - name: Create and Push Changes
+      run: |
+        # 4. Commit changes
+        git config --global user.email "actions@github.com"
+        git config --global user.name "GitHub Actions"
+        git add .
+        git commit -m "Add print statements and update GitHub Actions"
+        git push origin feature/dummy
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v3
+      with:
+        branch: feature/dummy
+        title: "Feature: Add dataset info"
+        labels: |
+          automation
+          feature
+
+    - name: Merge Pull Request
+      uses: peter-evans/merge-pull-request-action@v2
+      with:
+        pull-request-number: ${{ steps.create_pull_request.outputs.pull-request-number }}
