@@ -1,0 +1,40 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - feature/dummy
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check Out Repository
+      uses: actions/checkout@v2
+
+    - name: Set Up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x
+
+    - name: Install Dependencies
+      run: pip install -r requirements.txt
+
+    - name: Print Dataset Info
+      run: |
+        # 2.1: Calculate and print the number of total samples in the dataset
+        total_samples=$(( $(wc -l < train_data.txt) + $(wc -l < test_data.txt) + $(wc -l < dev_data.txt) ))
+        echo "Total samples in the dataset: $total_samples"
+
+        # 2.2: Calculate and print the size (height and width) of the images in the dataset
+        image_size=$(identify -format "%w x %h" image.png)
+        echo "Image size (height x width): $image_size"
+
+      # Replace "train_data.txt," "test_data.txt," "dev_data.txt," and "image.png" with your actual dataset and image file paths.
+
+    - name: Run Tests
+      run: pytest
+
+    - name: Deploy
+      # Add deployment steps as needed
